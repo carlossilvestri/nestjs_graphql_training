@@ -4,6 +4,7 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core';
 import { HelloWorldModule } from './hello-world/hello-world.module';
+import { TodoModule } from './todo/todo.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { HelloWorldModule } from './hello-world/hello-world.module';
       ]
     }),
     HelloWorldModule,
+    TodoModule,
   ],
 })
 export class AppModule {}
