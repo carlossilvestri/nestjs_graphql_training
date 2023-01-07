@@ -1,17 +1,21 @@
+import { AggregationsType } from './types/aggregations.type';
 import { TodoService } from './todo.service';
 import { Args, Query, Int, Mutation } from '@nestjs/graphql';
 import { Resolver } from '@nestjs/graphql';
 import { Todo } from './entity/todo.entity';
-import { CreateTodoInput } from './dto/inputs/create-todo.input';
+import { CreateTodoInput, StatusArgs, UpdateTodoInput } from './dto';
 
-@Resolver()
+@Resolver(() => Todo)
 export class TodoResolver {
     constructor(
         private readonly todoService: TodoService,
     ) { }
     @Query(() => [Todo], { name: "todos" })
-    findAll(): Todo[] {
-        return this.todoService.findAll();
+    findAll(
+        @Args() statusArgs: StatusArgs,
+        //! Tarea: Args //
+    ): Todo[] {
+        return this.todoService.findAll(statusArgs);
     }
     @Query(() => Todo, { name: "todo" })
     findOne(
@@ -23,7 +27,40 @@ export class TodoResolver {
     create(
         @Args("createTodoInput") createTodoInput: CreateTodoInput
     ) {
-        console.log({ createTodoInput });
-        return null;
+        return this.todoService.create(createTodoInput);
+    }
+    @Mutation(() => Todo, { name: "updateTodo" })
+    update(
+        @Args("updateTodoInput") updateTodoInput: UpdateTodoInput
+    ) {
+       return this.todoService.update(updateTodoInput);
+    }
+    @Mutation(() => Boolean)
+    remove(
+        @Args("id",{ type: ()=> Int}) id: number
+    ){
+        return this.todoService.remove(id);
+    }
+    // Aggregations
+    @Query(() => Int, { name: 'totalTodos'})
+    totalTodos() : number{
+        return this.todoService.totalTodos;
+    }
+    @Query(() => Int, { name: 'completedTodos'})
+    completedTodos() : number{
+        return this.todoService.completedTodos;
+    }
+    @Query(() => Int, { name: 'pendingTodos'})
+    pendingTodos() : number{
+        return this.todoService.pendingTodos;
+    }
+    @Query(() => AggregationsType)
+    aggregations() : AggregationsType {
+        return {
+            completed: this.todoService.completedTodos,
+            pending: this.todoService.pendingTodos,
+            total: this.todoService.totalTodos,
+            totalTodosCompleted: this.todoService.totalTodos,
+        }
     }
 }
