@@ -5,6 +5,8 @@ import { AuthResponse } from './types/auth-response.type';
 import { User } from './../users/entities/user.entity';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { CurrentUser } from './decorators/current-user.decorator';
+import { ValidRoles } from './enums/valid-roles.enum';
 @Resolver()
 export class AuthResolver {
   constructor(private readonly authService: AuthService) {}
@@ -21,13 +23,12 @@ export class AuthResolver {
     return this.authService.login(loginInput);
   }
 
-  @Query(() => AuthResponse, { name: 'revalidate' })
+  @Query(() => AuthResponse, { name: 'refreshToken' })
   @UseGuards(JwtAuthGuard)
-  revalidateToken(
-    // @CurrentUser user: User
+  refreshToken(
+    @CurrentUser( /*[ValidRoles.admin] */) user: User
   ): AuthResponse{
-    // return  this.authService.revalidateToken()
-    throw new Error('No implementado');
+    return  this.authService.refreshToken(user)
   }
 
 }

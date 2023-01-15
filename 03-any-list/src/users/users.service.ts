@@ -28,11 +28,7 @@ export class UsersService {
   async findAll() : Promise<User[]>{
     return [];
   }
-
-  async findOne(id: string) : Promise<User>{
-    throw new Error('Not implemented');
-  }
-  async findOneField(payload: { field: string, value: string}) : Promise<User>{
+  async findOne(payload: { field: string, value: string}) : Promise<User>{
     try {
       const { field, value } = payload;
       return await this.usersRepository.findOneByOrFail({[field]: value});
