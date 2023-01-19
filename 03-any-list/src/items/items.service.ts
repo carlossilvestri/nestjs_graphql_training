@@ -1,3 +1,4 @@
+import { User } from 'src/users/entities/user.entity';
 import { Item } from './entities/item.entity';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateItemInput, UpdateItemInput } from './dto/inputs';
@@ -10,15 +11,23 @@ export class ItemsService {
     @InjectRepository(Item)
     private readonly itemRepository: Repository<Item>
   ){}
-  async create(createItemInput: CreateItemInput) : Promise<Item>{
-    const newItem = this.itemRepository.create(createItemInput);
+  async create(createItemInput: CreateItemInput, user: User) : Promise<Item>{
+    const newItem = this.itemRepository.create({
+      ...createItemInput,
+      user
+    });
     return await this.itemRepository.save(newItem);
   }
 
-  async findAll() : Promise<Item[]> {
+  async findAll(user: User) : Promise<Item[]> {
     //! TODO: filtrar, paginar, por usuario...
-    return await this.itemRepository.find();
-    return [];
+    return await this.itemRepository.find({
+      where: {
+        user: {
+          id: user.id
+        }
+      }
+    });
   }
 
   async findOne(id: string) : Promise<Item> {
@@ -26,17 +35,37 @@ export class ItemsService {
     if(!item) throw new NotFoundException(`Item ${id} not found`);
     return item;
   }
-
-  async update(id: string, updateItemInput: UpdateItemInput): Promise<Item> {
-    await this.findOne(id);
+  async findOneByIdAndUser(id: string, user: User) : Promise<Item> {
+    const item = await this.itemRepository.findOneBy({
+      id,
+      user: {
+        id: user.id
+      }
+    });
+    if(!item) throw new NotFoundException(`Item ${id} not found for your user`);
+    return item;
+  }
+  async update(id: string, updateItemInput: UpdateItemInput, user: User): Promise<Item> {
+    await this.findOneByIdAndUser(id, user);
     const item = await this.itemRepository.preload(updateItemInput);
     return this.itemRepository.save(item);
   }
 
-  async remove(id: string): Promise<Item> {
+  async remove(id: string, user: User): Promise<Item> {
     //!TODO: Soft delete, integridad referencial.
-    const item = await this.findOne(id);
+    const item = await this.findOneByIdAndUser(id, user);
     await this.itemRepository.remove(item);
     return {...item, id};
+  }
+
+
+  async itemCountByUser(user: User) : Promise<number> {
+    return this.itemRepository.count({
+      where: {
+        user: {
+          id: user.id
+        }
+      }
+    });
   }
 }

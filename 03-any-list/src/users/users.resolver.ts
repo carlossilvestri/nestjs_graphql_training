@@ -1,7 +1,8 @@
+import { ItemsService } from './../items/items.service';
 import { UseGuards, ParseUUIDPipe } from '@nestjs/common';
 import { JwtAuthGuard } from './../auth/guards/jwt-auth.guard';
 import { SignupInput } from './../auth/dto/inputs/signup.input';
-import { Resolver, Query, Mutation, Args, Int, ID } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Int, ID, ResolveField, Parent } from '@nestjs/graphql';
 import { UsersService } from './users.service';
 import { User } from './entities/user.entity';
 import { ValidRolesArgs } from './dto/args/roles.arg';
@@ -12,7 +13,10 @@ import { UpdateUserInput } from './dto/update-user.input';
 @Resolver(() => User)
 @UseGuards(JwtAuthGuard)
 export class UsersResolver {
-  constructor(private readonly usersService: UsersService) { }
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly itemService: ItemsService
+    ) { }
 
   createUser(@Args('signupInput') signupInput: SignupInput) {
     return this.usersService.create(signupInput);
@@ -23,7 +27,6 @@ export class UsersResolver {
     @Args() validRoles: ValidRolesArgs,
     @CurrentUser([ValidRoles.admin, ValidRoles.superUser]) user: User
   ): Promise<User[]> {
-    console.log({ validRoles });
     return await this.usersService.findAll(validRoles.roles);
   }
 
@@ -50,5 +53,12 @@ export class UsersResolver {
     @CurrentUser([ValidRoles.admin, ValidRoles.superUser]) user: User,
   ): Promise<User> {
     return this.usersService.block(id, user);
+  }
+
+  @ResolveField(() => Int, { name: 'itemCount' })
+  async itemCount(
+    @Parent() user: User,
+  ) : Promise<number> {
+    return this.itemService.itemCountByUser(user);
   }
 }

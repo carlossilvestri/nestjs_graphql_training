@@ -37,7 +37,6 @@ export class UsersService {
     }
     */
     );
-    console.log("hola mundo");
     return await this.usersRepository.createQueryBuilder().andWhere('ARRAY[roles] && ARRAY[:...roles]').setParameter('roles', roles).getMany();
   }
   async findOne(payload: { field: string, value: string}) : Promise<User>{

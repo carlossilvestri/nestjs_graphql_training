@@ -2,14 +2,6 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type Item {
-  """uuid"""
-  id: ID!
-  name: String!
-  quantity: Float!
-  quantityUnists: String
-}
-
 type User {
   id: ID!
   fullName: String!
@@ -17,6 +9,16 @@ type User {
   roles: [String!]!
   isActive: Boolean!
   lastUpdateBy: User
+  items: [Item!]!
+  itemCount: Int!
+}
+
+type Item {
+  """uuid"""
+  id: ID!
+  name: String!
+  quantityUnists: String
+  user: User!
 }
 
 type AuthResponse {
@@ -29,7 +31,8 @@ type Query {
   users(roles: [ValidRoles!] = []): [User!]!
   user(id: ID!): User!
   items: [Item!]!
-  item(id: ID!): Item!
+  itemByIdAndUserLogged(id: ID!): Item!
+  itemById(id: ID!): Item!
 }
 
 """Allowed or valid roles"""
@@ -71,13 +74,11 @@ input UpdateUserInput {
 
 input CreateItemInput {
   name: String!
-  quantity: Float!
   quantityUnists: String
 }
 
 input UpdateItemInput {
   name: String
-  quantity: Float
   quantityUnists: String
   id: ID!
 }

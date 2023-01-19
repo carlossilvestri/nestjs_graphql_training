@@ -1,4 +1,5 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Item } from './../../items/entities/item.entity';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { ObjectType, Field, ID } from '@nestjs/graphql';
 
 @Entity({name: 'user'})
@@ -34,4 +35,8 @@ export class User {
   @JoinColumn({name: 'lastUpdateBy'})
   @Field(() => User, {nullable: true})
   lastUpdateBy?: User;
+
+  @OneToMany(() => Item, (item: Item) => item.user, { lazy: true})
+  @Field(() => [Item])
+  items: Item[];
 }
