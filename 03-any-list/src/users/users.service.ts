@@ -5,6 +5,7 @@ import { SignupInput } from './../auth/dto/inputs/signup.input';
 import { UpdateUserInput } from './dto/update-user.input';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ValidRoles } from 'src/auth/enums/valid-roles.enum';
 
 @Injectable()
 export class UsersService {
@@ -25,8 +26,19 @@ export class UsersService {
     }
   }
 
-  async findAll() : Promise<User[]>{
-    return [];
+  async findAll(roles: ValidRoles[]) : Promise<User[]>{
+    if(!roles.length) return await this.usersRepository.find(
+      /*
+      // No es necesario porque tenemos lazy en la entidad.
+      {
+      relations: {
+        lastUpdateBy: true
+      }
+    }
+    */
+    );
+    console.log("hola mundo");
+    return await this.usersRepository.createQueryBuilder().andWhere('ARRAY[roles] && ARRAY[:...roles]').setParameter('roles', roles).getMany();
   }
   async findOne(payload: { field: string, value: string}) : Promise<User>{
     try {
@@ -43,15 +55,29 @@ export class UsersService {
       this.handleDBErrors(error);
     }
   }
-  update(id: number, updateUserInput: UpdateUserInput) {
-    return `This action updates a #${id} user`;
+  async update(id: string, updateUserInput: UpdateUserInput, updatedBy: User) : Promise<User> {
+    try {
+      const user = await this.usersRepository.preload({
+        ...updateUserInput,
+        id
+      });
+      user.lastUpdateBy = updatedBy;
+      return await this.usersRepository.save(user);
+    } catch (error) {
+      // manejar error
+      console.log("error ", error);
+      this.handleDBErrors(error);
+    }
   }
 
   remove(id: number) {
     return `This action removes a #${id} user`;
   }
-  block(id: string): Promise<User> {
-    throw new Error('Not implemented');
+  async block(id: string, adminUser: User): Promise<User> {
+    const userToBlock = await this.findOne({field: 'id', value: id});
+    userToBlock.isActive = false;
+    userToBlock.lastUpdateBy = adminUser;
+    return await this.usersRepository.save(userToBlock);
   }
 
   private handleDBErrors(error: any): never{

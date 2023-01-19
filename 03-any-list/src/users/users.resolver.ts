@@ -1,36 +1,54 @@
+import { UseGuards, ParseUUIDPipe } from '@nestjs/common';
+import { JwtAuthGuard } from './../auth/guards/jwt-auth.guard';
 import { SignupInput } from './../auth/dto/inputs/signup.input';
 import { Resolver, Query, Mutation, Args, Int, ID } from '@nestjs/graphql';
 import { UsersService } from './users.service';
 import { User } from './entities/user.entity';
+import { ValidRolesArgs } from './dto/args/roles.arg';
+import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
+import { ValidRoles } from 'src/auth/enums/valid-roles.enum';
+import { UpdateUserInput } from './dto/update-user.input';
 
 @Resolver(() => User)
+@UseGuards(JwtAuthGuard)
 export class UsersResolver {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) { }
 
   createUser(@Args('signupInput') signupInput: SignupInput) {
     return this.usersService.create(signupInput);
   }
 
   @Query(() => [User], { name: 'users' })
-  async findAll() : Promise<User[]> {
-    return await this.usersService.findAll();
+  async findAll(
+    @Args() validRoles: ValidRolesArgs,
+    @CurrentUser([ValidRoles.admin, ValidRoles.superUser]) user: User
+  ): Promise<User[]> {
+    console.log({ validRoles });
+    return await this.usersService.findAll(validRoles.roles);
   }
 
   @Query(() => User, { name: 'user' })
-  async findOne(@Args('id', { type: () => ID }) id: string) : Promise<User>{
+  async findOne(
+    @Args('id', { type: () => ID }, ParseUUIDPipe) id: string,
+    @CurrentUser([ValidRoles.admin, ValidRoles.superUser]) user: User
+  ): Promise<User> {
     //! TODO
-    throw new Error("Not implemented");
-    // return await this.usersService.findOne(id);
+    return await this.usersService.findOne({ field: 'id', value: id });
   }
-/*
-  @Mutation(() => User)
-  updateUser(@Args('updateUserInput') updateUserInput: UpdateUserInput) {
-    return this.usersService.update(updateUserInput.id, updateUserInput);
-  }
-*/
 
   @Mutation(() => User)
-  blockUser(@Args('id', { type: () => ID }) id: string) : Promise<User>{
-    return this.usersService.block(id);
+  async updateUser(
+    @Args('updateUserInput') updateUserInput: UpdateUserInput,
+    @CurrentUser([ValidRoles.admin]) user: User
+    ) {
+    return await this.usersService.update(updateUserInput.id, updateUserInput, user);
+  }
+
+  @Mutation(() => User, { name: 'blockUser' })
+  blockUser(
+    @Args('id', { type: () => ID }, ParseUUIDPipe) id: string,
+    @CurrentUser([ValidRoles.admin, ValidRoles.superUser]) user: User,
+  ): Promise<User> {
+    return this.usersService.block(id, user);
   }
 }
