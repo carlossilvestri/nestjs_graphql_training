@@ -12,8 +12,13 @@ export class CreateItemInput {
   // @IsPositive()
   // quantity: number;
 
+  @Field(() => String, {nullable: true})
+  @IsString()
+  @IsOptional()
+  category?: string; 
+
   @Field(() => String, { nullable: true})
   @IsString()
   @IsOptional()
-  quantityUnists: string // g, ml, kg
+  quantityUnists?: string // g, ml, kg
 }

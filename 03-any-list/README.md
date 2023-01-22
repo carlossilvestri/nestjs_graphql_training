@@ -49,6 +49,7 @@ npm run start:dev
 ```
 localhost:3000/graphql
 ```
+7. Execute __"mutation"__ executeSeed to fill database.
 ## Installation
 
 ```bash

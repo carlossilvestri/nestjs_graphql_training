@@ -21,7 +21,9 @@ export class Item {
   @Field(() => String, {nullable: true})
   quantityUnists?: string // g, ml, kg
 
-
+  @Column({nullable: true})
+  @Field(() => String, {nullable: true})
+  category?: string; 
   // stores
   // user
   @ManyToOne(() => User, (user: User) => user.items, {nullable: false, lazy: true })

@@ -18,6 +18,7 @@ type Item {
   id: ID!
   name: String!
   quantityUnists: String
+  category: String
   user: User!
 }
 
@@ -50,6 +51,9 @@ type Mutation {
   createItem(createItemInput: CreateItemInput!): Item!
   updateItem(updateItemInput: UpdateItemInput!): Item!
   removeItem(id: ID!): Item!
+
+  """Feed the database with new data"""
+  executeSeed: Boolean!
 }
 
 input SignupInput {
@@ -74,11 +78,13 @@ input UpdateUserInput {
 
 input CreateItemInput {
   name: String!
+  category: String
   quantityUnists: String
 }
 
 input UpdateItemInput {
   name: String
+  category: String
   quantityUnists: String
   id: ID!
 }

@@ -10,6 +10,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { async } from 'rxjs';
+import { SeedModule } from './seed/seed.module';
 
 @Module({
   imports: [
@@ -65,6 +66,7 @@ import { async } from 'rxjs';
     ItemsModule,
     UsersModule,
     AuthModule,
+    SeedModule,
   ],
 })
 export class AppModule { }
