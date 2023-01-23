@@ -7,7 +7,7 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({
     whitelist: true,
-    forbidNonWhitelisted: true,
+    // forbidNonWhitelisted: true, // Para mandar mas informacion de la que se requiere, pero graphql ya hace esto por nosotros...
     })
    );
   await app.listen(3000);
