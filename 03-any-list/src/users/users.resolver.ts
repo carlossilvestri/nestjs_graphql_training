@@ -1,3 +1,8 @@
+import { List } from './../list/entities/list.entity';
+import { ListService } from './../list/list.service';
+import { SearchArgs } from './../common/dto/args/search.args';
+import { PaginationArgs } from './../common/dto/args';
+import { Item } from './../items/entities/item.entity';
 import { ItemsService } from './../items/items.service';
 import { UseGuards, ParseUUIDPipe } from '@nestjs/common';
 import { JwtAuthGuard } from './../auth/guards/jwt-auth.guard';
@@ -15,7 +20,8 @@ import { UpdateUserInput } from './dto/update-user.input';
 export class UsersResolver {
   constructor(
     private readonly usersService: UsersService,
-    private readonly itemService: ItemsService
+    private readonly itemService: ItemsService,
+    private readonly listService: ListService,
     ) { }
 
   createUser(@Args('signupInput') signupInput: SignupInput) {
@@ -60,5 +66,30 @@ export class UsersResolver {
     @Parent() user: User,
   ) : Promise<number> {
     return this.itemService.itemCountByUser(user);
+  }
+  @ResolveField(() => [Item], { name: 'items' })
+  async getItemsByUser(
+    @Parent() user: User,
+    @Args() paginationArgs: PaginationArgs,
+    @Args() searchArgs: SearchArgs,
+  ) : Promise<Item[]> {
+    return this.itemService.findAll(user, paginationArgs, searchArgs);
+  }
+
+
+  @ResolveField(() => Int, { name: 'listCount' })
+  async listCount(
+    @Parent() user: User,
+  ) : Promise<number> {
+    return this.listService.countByUser(user);
+  }
+
+  @ResolveField(() => [List], { name: 'lists' })
+  async getListsByUser(
+    @Parent() user: User,
+    @Args() paginationArgs: PaginationArgs,
+    @Args() searchArgs: SearchArgs,
+  ) : Promise<List[]> {
+    return this.listService.findAll(user, paginationArgs, searchArgs);
   }
 }

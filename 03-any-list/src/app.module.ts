@@ -12,6 +12,8 @@ import { AuthModule } from './auth/auth.module';
 import { async } from 'rxjs';
 import { SeedModule } from './seed/seed.module';
 import { CommonModule } from './common/common.module';
+import { ListModule } from './list/list.module';
+import { ListItemModule } from './list-item/list-item.module';
 
 @Module({
   imports: [
@@ -69,6 +71,8 @@ import { CommonModule } from './common/common.module';
     AuthModule,
     SeedModule,
     CommonModule,
+    ListModule,
+    ListItemModule,
   ],
 })
 export class AppModule { }

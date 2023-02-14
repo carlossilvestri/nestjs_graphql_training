@@ -19,7 +19,6 @@ export class ItemsResolver {
     @Args('createItemInput') createItemInput: CreateItemInput,
     @CurrentUser() user: User
     ): Promise<Item> {
-      console.log(user);
     return await this.itemsService.create(createItemInput, user);
   }
 
@@ -29,7 +28,6 @@ export class ItemsResolver {
     @Args() paginationArgs: PaginationArgs,
     @Args() searchArgs: SearchArgs
   ) : Promise<Item[]> {
-    console.log({paginationArgs, searchArgs});
     return this.itemsService.findAll(user, paginationArgs, searchArgs);
   }
 

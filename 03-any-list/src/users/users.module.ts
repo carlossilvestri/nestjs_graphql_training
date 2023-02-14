@@ -1,3 +1,4 @@
+import { ListModule } from './../list/list.module';
 import { ItemsModule } from './../items/items.module';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -7,7 +8,7 @@ import { User } from './entities/user.entity';
 
 @Module({
   providers: [UsersResolver, UsersService],
-  imports: [TypeOrmModule.forFeature([User]), ItemsModule],
+  imports: [TypeOrmModule.forFeature([User]), ItemsModule, ListModule],
   exports: [TypeOrmModule, UsersResolver, UsersService]
 })
 export class UsersModule {}
